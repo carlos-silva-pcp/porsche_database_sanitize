@@ -325,7 +325,7 @@ Mais do que construir uma interface, o projeto busca demonstrar a importância d
 
 ---
 
-**Disclaimer:** Projeto do bootcamp da @digitalinnovationone, desenvolvido exclusivamente para fins educacionais e de portfólio. Não possui vínculo, patrocínio ou associação oficial com a Porsche AG.
+**Disclaimer:** Projeto do bootcamp da [DIO](https://www.dio.me/en) @, desenvolvido exclusivamente para fins educacionais e de portfólio. Não possui vínculo, patrocínio ou associação oficial com a Porsche AG.
 
 
 

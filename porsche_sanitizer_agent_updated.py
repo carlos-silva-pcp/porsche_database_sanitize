@@ -35,7 +35,7 @@ MODELS = ["911 Carrera","911 Carrera S","911 Carrera GTS","911 Turbo","911 Turbo
 "Panamera Turbo","Panamera Turbo S","Panamera 4 E-Hybrid","Taycan","Taycan 4S","Taycan GTS",
 "Taycan Turbo","Taycan Turbo S","Taycan Cross Turismo"]
 MODEL_MAP={re.sub(r"[^a-z0-9]+","",x.lower()):x for x in MODELS}
-def txt(v): return "" if pd.isna(v) else re.sub(r"\\s+"," ",str(v).strip())
+def txt(v): return "" if pd.isna(v) else re.sub(r"\s+"," ",str(v).strip())
 def words_num(s):
     d={"zero":0,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,
     "ten":10,"eleven":11,"twelve":12,"thirteen":13,"fourteen":14,"fifteen":15,"sixteen":16,
@@ -106,7 +106,7 @@ def model_clean(v):
     return MODEL_MAP.get(k," ".join(w.capitalize() for w in s.split()))
 def payment_clean(v):
     s=txt(v).lower().replace("_"," ")
-    k=re.sub(r"\\s+"," ",s).strip()
+    k=re.sub(r"\s+"," ",s).strip()
     return PAYMENTS.get(k,PAYMENTS.get(re.sub(r"[^a-z0-9]","",k)," ".join(w.capitalize() for w in k.split()) if k else "INVALID"))
 def city_clean(v):
     s=txt(v)
@@ -114,9 +114,30 @@ def city_clean(v):
 def state_clean(v): return US_STATES.get(txt(v).lower(),"INVALID")
 def delivery_clean(v):
     s=re.sub(r"[!?.,;:]","",txt(v).lower())
-    s=re.sub(r"[_-]+"," ",s); s=re.sub(r"\\s+"," ",s).strip()
+    s=re.sub(r"[_-]+"," ",s); s=re.sub(r"\s+"," ",s).strip()
     return DELIVERIES.get(s," ".join(w.capitalize() for w in s.split()) if s else "INVALID")
-RULES={"sale_date":("SaleDateSanitized",date_clean),"porsche_model":("PorscheModelSanitized",model_clean),
+NAME_PARTICLES = {"da", "de", "do", "das", "dos", "van"}
+NAME_PLACEHOLDERS = {"n/a", "null", "none", "unknown"}
+
+def name_clean(value):
+    """Normalize names without guessing identity or correcting spelling."""
+    if pd.isna(value):
+        return "INVALID"
+    name = re.sub(r"\s+", " ", str(value).strip())
+    if not name or name.casefold() in NAME_PLACEHOLDERS:
+        return "INVALID"
+    def normalize_piece(piece):
+        return piece[:1].upper() + piece[1:].lower() if piece else piece
+    words = []
+    for index, word in enumerate(name.split(" ")):
+        if index > 0 and word.casefold() in NAME_PARTICLES:
+            words.append(word.lower())
+        else:
+            # Capitalize individual segments after apostrophes and hyphens.
+            words.append(re.sub(r"[^'’\-]+", lambda m: normalize_piece(m.group()), word))
+    return " ".join(words)
+
+RULES={"customer_name":("CustomerNameSanitized",name_clean),"sales_person":("SalesPersonSanitized",name_clean),"salesperson":("SalesPersonSanitized",name_clean),"sale_date":("SaleDateSanitized",date_clean),"porsche_model":("PorscheModelSanitized",model_clean),
 "model_year":("ModelYearSanitized",year_clean),"sale_price":("SalePriceSanitized",price_clean),
 "vehicle_mileage":("VehicleMileageSanitized",mileage_clean),"payment_method":("PaymentMethodSanitized",payment_clean),
 "city":("CitySanitized",city_clean),"state":("StateSanitized",state_clean),
@@ -132,8 +153,11 @@ def sanitize(input_xlsx,schema_md,output_xlsx):
             df=pd.read_excel(input_xlsx,sheet_name=sh)
             missing=[c for c in REQUIRED if c not in df.columns]
             if missing: raise ValueError(f"Colunas obrigatórias ausentes em {sh}: {missing}")
+            if not any(c in df.columns for c in ("sales_person", "salesperson")):
+                raise ValueError(f"Coluna de vendedor ausente em {sh}: sales_person ou salesperson")
             out=df.copy()
-            for src,(dest,fn) in RULES.items(): out[dest]=df[src].apply(fn)
+            for src,(dest,fn) in RULES.items():
+                if src in df.columns: out[dest]=df[src].apply(fn)
             cols=[]
             for c in df.columns:
                 cols.append(c)

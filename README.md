@@ -13,6 +13,10 @@ O projeto foi desenvolvido para fins de estudo e portfólio, simulando um cenár
 
 ---
 
+<img width="400" height="225" alt="Video Project 1" src="https://github.com/user-attachments/assets/623f7f08-b801-424a-a286-b31a7324a510" />
+
+---
+
 ## 1. Objetivo do projeto
 
 Transformar dados de vendas em informações confiáveis e acessíveis para responder a perguntas relevantes ao negócio.
@@ -325,7 +329,7 @@ Mais do que construir uma interface, o projeto busca demonstrar a importância d
 
 ---
 
-**Disclaimer:** Projeto do bootcamp da [DIO](https://www.dio.me/en) @, desenvolvido exclusivamente para fins educacionais e de portfólio. Não possui vínculo, patrocínio ou associação oficial com a Porsche AG.
+**Disclaimer:** Projeto do bootcamp da [DIO](https://www.dio.me/en), desenvolvido exclusivamente para fins educacionais e de portfólio. Não possui vínculo, patrocínio ou associação oficial com a Porsche AG.
 
 
 

@@ -34,6 +34,47 @@
 
 ## Sanitization rules
 
+### Customer Name and Sales Person
+
+Normalize `customer_name` and `sales_person` to a consistent, human-readable name format.
+
+Apply the following rules:
+
+1. Remove leading and trailing whitespace.
+2. Replace multiple consecutive spaces with a single space.
+3. Convert names to Title Case, capitalizing the first letter of each name component.
+4. Preserve accented characters and Unicode letters.
+5. Preserve valid apostrophes and hyphens in compound names.
+6. Capitalize name components after apostrophes and hyphens when appropriate.
+7. Preserve common lowercase name particles such as `da`, `de`, `do`, `das`, `dos`, and `van`, except when they appear as the first word.
+8. Do not automatically correct spelling mistakes or infer missing name components.
+9. Preserve the original name columns without modification.
+10. Return `INVALID` for empty, null, whitespace-only, or placeholder values such as `N/A`, `NULL`, `NONE`, and `UNKNOWN`.
+
+Examples:
+
+- `JHON   SMITH` → `Jhon Smith`
+- `MARY johnson` → `Mary Johnson`
+- `william  clark` → `William Clark`
+- `SARAH lee` → `Sarah Lee`
+- `john o'brien` → `John O'Brien`
+- `anna-maria SILVA` → `Anna-Maria Silva`
+- `MARIA DA SILVA` → `Maria da Silva`
+- `JOSÉ  GARCÍA` → `José García`
+- `NULL` → `INVALID`
+
+### Name Quality Checks
+
+After normalization, verify:
+
+- Every original name column remains unchanged.
+- `CustomerNameSanitized` appears immediately after `customer_name`.
+- `SalesPersonSanitized` appears immediately after `sales_person`.
+- No sanitized name contains leading, trailing, or repeated spaces.
+- No sanitized name is blank.
+- Names preserve valid accents, apostrophes, and hyphens.
+- Invalid or missing names are represented by `INVALID`.
+
 ### Dates
 
 Normalize to ISO `YYYY-MM-DD`.
